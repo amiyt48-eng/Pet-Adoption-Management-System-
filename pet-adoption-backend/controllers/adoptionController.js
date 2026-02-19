@@ -37,18 +37,24 @@ export const getAllApplications = async (req, res) => {
 };
 
 export const updateApplicationStatus = async (req, res) => {
-  const adoption = await Adoption.findById(req.params.id).populate("pet");
+  const { status } = req.body; // Approved or Rejected
 
-  adoption.status = req.body.status;
+  const application = await Adoption.findById(req.params.id);
 
-  if (req.body.status === "Approved") {
-    adoption.pet.status = "Adopted";
-  } else {
-    adoption.pet.status = "Available";
+  if (!application) {
+    return res.status(404).json({ message: "Application not found" });
   }
 
-  await adoption.pet.save();
-  await adoption.save();
+  application.status = status;
 
-  res.json(adoption);
+  await application.save();
+
+  // If approved → update pet status
+  if (status === "Approved") {
+    await Pet.findByIdAndUpdate(application.pet, {
+      status: "Adopted",
+    });
+  }
+
+  res.json(application);
 };
