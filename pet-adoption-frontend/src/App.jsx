@@ -6,50 +6,34 @@ import Register from "./pages/Register";
 import Pets from "./pages/Pets";
 import PetDetails from "./pages/PetDetails";
 import Dashboard from "./pages/UserDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import ApplyAdoption from "./pages/ApplyAdoption";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Navbar from "./components/Navbar";
 
 function App() {
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
 
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-white">
+              <Navbar />
+
         <Routes>
 
           {/* ================= VISITOR ================= */}
           <Route path="/" element={<Pets />} />
           <Route path="/pets/:id" element={<PetDetails />} />
-          <Route path="/apply/:id" element={<ApplyAdoption />} />
 
           {/* ================= AUTH ================= */}
-          <Route
-            path="/login"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/dashboard" replace />
-              ) : (
-                <Login />
-              )
-            }
-          />
-
-          <Route
-            path="/register"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/dashboard" replace />
-              ) : (
-                <Register />
-              )
-            }
-          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           {/* ================= USER ================= */}
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="user">
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -58,14 +42,24 @@ function App() {
           <Route
             path="/apply/:id"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="user">
                 <ApplyAdoption />
               </ProtectedRoute>
             }
           />
 
+          {/* ================= ADMIN ================= */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute role="admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
           {/* ================= 404 ================= */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
       </div>

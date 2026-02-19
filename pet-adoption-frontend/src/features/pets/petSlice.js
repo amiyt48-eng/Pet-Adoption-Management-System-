@@ -28,6 +28,16 @@ export const deletePet = createAsyncThunk(
   }
 );
 
+// UPDATE PET
+export const updatePet = createAsyncThunk(
+  "pets/updatePet",
+  async ({ id, data }) => {
+    const res = await API.put(`/pets/${id}`, data);
+    return res.data;
+  }
+);
+
+
 const petSlice = createSlice({
   name: "pets",
   initialState: {
@@ -48,6 +58,14 @@ const petSlice = createSlice({
         (pet) => pet._id !== action.payload
       );
     });
+    builder.addCase(updatePet.fulfilled, (state, action) => {
+  state.pets = state.pets.map((pet) =>
+    pet._id === action.payload._id
+      ? action.payload
+      : pet
+  );
+});
+
   },
 });
 

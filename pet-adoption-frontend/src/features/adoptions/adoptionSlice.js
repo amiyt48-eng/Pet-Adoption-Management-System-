@@ -4,15 +4,22 @@ import API from "../../api/axios";
 /* ================= USER - APPLY ================= */
 export const applyAdoption = createAsyncThunk(
   "adoptions/apply",
-  async (petId, { rejectWithValue }) => {
-    try {
-      const res = await API.post("/adoptions", { petId });
-      return res.data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Application failed"
-      );
-    }
+  async (petId, { getState }) => {
+    const { user } = getState().auth;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    };
+
+    const res = await API.post(
+      "/adoptions",
+      { petId },
+      config
+    );
+
+    return res.data;
   }
 );
 
@@ -49,15 +56,22 @@ export const getAllApplications = createAsyncThunk(
 /* ================= ADMIN - UPDATE STATUS ================= */
 export const updateApplication = createAsyncThunk(
   "adoptions/update",
-  async ({ id, status }, { rejectWithValue }) => {
-    try {
-      const res = await API.put(`/adoptions/${id}`, { status });
-      return res.data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || "Update failed"
-      );
-    }
+  async ({ id, status }, { getState }) => {
+    const { user } = getState().auth;
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    };
+
+    const res = await API.put(
+      `/adoptions/${id}`,
+      { status },
+      config
+    );
+
+    return res.data;
   }
 );
 

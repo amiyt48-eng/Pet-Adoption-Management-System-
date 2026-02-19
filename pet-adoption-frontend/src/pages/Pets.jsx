@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchPets } from "../features/pets/petSlice";
+import { Link } from "react-router-dom";
+
 
 const dummyPets = [
   { _id: "1", name: "Buddy", breed: "Labrador", species: "Dog", age: 2 },
@@ -12,7 +14,7 @@ const dummyPets = [
 ];
 
 const Pets = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [search, setSearch] = useState("");
@@ -23,16 +25,26 @@ const { isAuthenticated } = useSelector((state) => state.auth);
 
   const petsPerPage = 4;
 
+
+  const dispatch = useDispatch();
+const { pets, loading } = useSelector((state) => state.pets);
+
+useEffect(() => {
+  dispatch(fetchPets());
+}, [dispatch]);
+
+
   // Filtering
-  const filteredPets = dummyPets.filter((pet) => {
-    return (
-      (pet.name.toLowerCase().includes(search.toLowerCase()) ||
-        pet.breed.toLowerCase().includes(search.toLowerCase())) &&
-      (species ? pet.species === species : true) &&
-      (breed ? pet.breed === breed : true) &&
-      (age ? pet.age === Number(age) : true)
-    );
-  });
+const filteredPets = pets.filter((pet) => {
+  return (
+    (pet.name.toLowerCase().includes(search.toLowerCase()) ||
+      pet.breed.toLowerCase().includes(search.toLowerCase())) &&
+    (species ? pet.species === species : true) &&
+    (breed ? pet.breed === breed : true) &&
+    (age ? pet.age === Number(age) : true)
+  );
+});
+
 
   // Pagination
   const indexOfLastPet = currentPage * petsPerPage;
@@ -115,7 +127,11 @@ const { isAuthenticated } = useSelector((state) => state.auth);
       <div className="grid md:grid-cols-4 gap-6">
 
         {currentPets.length === 0 && (
-          <p className="text-gray-500">No pets found.</p>
+           <div className="col-span-4 flex justify-center items-center py-20">
+    <p className="text-gray-500 text-lg font-medium">
+      No pets found 🐾
+    </p>
+  </div>
         )}
 
         {currentPets.map((pet) => (

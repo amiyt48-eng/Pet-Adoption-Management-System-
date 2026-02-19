@@ -1,95 +1,77 @@
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import { getMyApplications } from "../features/adoptions/adoptionSlice";
+import { logout } from "../features/auth/authSlice";
+import { Link, useNavigate } from "react-router-dom";
 
-const UserDashboard = () => {
+const Navbar = () => {
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { applications, loading, error } = useSelector(
-    (state) => state.adoptions
-  );
-
-  useEffect(() => {
-    dispatch(getMyApplications());
-  }, [dispatch]);
-
-  const getStatusBadge = (status) => {
-    if (status === "Approved")
-      return "bg-green-100 text-green-600";
-    if (status === "Rejected")
-      return "bg-red-100 text-red-600";
-    return "bg-yellow-100 text-yellow-600";
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/");
   };
 
   return (
-    <>
-      <Navbar />
+    <nav className="bg-white border-b shadow-sm px-8 py-4 flex justify-between items-center">
+      
+      {/* Logo */}
+      <Link
+        to="/"
+        className="text-2xl font-bold text-blue-600 hover:text-blue-700"
+      >
+        🐾 PetAdopt
+      </Link>
 
-      <div className="min-h-screen bg-white p-10">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">
-            My Applications 🐾
-          </h1>
+      {/* Right Side */}
+      <div className="flex items-center gap-6">
 
-          <button
-            onClick={() => navigate("/")}
-            className="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 transition"
-          >
-            Apply for Adoption
-          </button>
-        </div>
+        {!isAuthenticated ? (
+          <>
+            <Link
+              to="/login"
+              className="text-gray-700 hover:text-blue-600 font-medium"
+            >
+              Login
+            </Link>
 
-        <div className="bg-gray-50 rounded-2xl shadow p-6">
+            <Link
+              to="/register"
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              Register
+            </Link>
+          </>
+        ) : (
+          <>
+            {user?.role === "admin" ? (
+              <Link
+                to="/admin"
+                className="text-gray-700 hover:text-blue-600 font-medium"
+              >
+                Admin Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/dashboard"
+                className="text-gray-700 hover:text-blue-600 font-medium"
+              >
+                My Applications
+              </Link>
+            )}
 
-          {loading && <p>Loading...</p>}
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+            >
+              Logout
+            </button>
+          </>
+        )}
 
-          {error && (
-            <p className="text-red-500">{error}</p>
-          )}
-
-          {!loading && applications.length === 0 && (
-            <p className="text-gray-500">
-              No applications found.
-            </p>
-          )}
-
-          {!loading && applications.length > 0 && (
-            <table className="w-full">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="py-3">Pet</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {applications.map((app) => (
-                  <tr key={app._id} className="border-b">
-                    <td className="py-3">
-                      {app.pet?.name}
-                    </td>
-
-                    <td>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(
-                          app.status
-                        )}`}
-                      >
-                        {app.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
       </div>
-    </>
+    </nav>
   );
 };
 
-export default UserDashboard;
+export default Navbar;
